@@ -2,13 +2,13 @@ from flask.ext.assets import Bundle
 
 from . import wa
 
-js_libs = Bundle('js/lib/jquery.min.js',
-                 'js/lib/bootstrap.min.js',
-                 'js/lib/lodash.min.js',
+js_libs = Bundle('js/libs/jquery.min.js',
+                 'js/libs/bootstrap.min.js',
+                 'js/libs/lodash.min.js',
                  filters='jsmin',
                  output='js/libs.js')
 
-js_board = Bundle('js/lib/drawingboard.min.js',
+js_board = Bundle('js/libs/drawingboard.min.js',
                  filters='jsmin',
                  output='js/board.js')
 
