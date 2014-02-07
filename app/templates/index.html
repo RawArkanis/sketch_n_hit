@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" id="container">
+  <div class="jumbotron center">
+    <div class="row">
+      <div class="span12">
+        <h1>
+          <i class="fa fa-pencil-square-o fa-6x"></i> Sketch'n'Hit
+        </h1>
+        <br />
+        <p>
+          <strong>Welcome to Sketch'n'Hit!</strong><br />
+          Draw, hit and have fun with your friends.
+        </p>
+        <br />
+        <a class="btn btn-success btn-lg" href="{{ url_for('login') }}"> Play! </a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.container -->
+{% endblock %}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sketch'n'Hit - {{title}}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  {% assets "css_main" %}
+  <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+
+</head>
+<body>
+  {% block content %}{% endblock %}
+
+  <div id="fb-root"></div>
+
+  {% assets "js_libs" %}
+  <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+  {% block scripts %}{% endblock %}
+  {% assets "js_main" %}
+  <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+</body>
+</html>
