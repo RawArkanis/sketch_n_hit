@@ -5,7 +5,7 @@
   <div class="well">
     <div class="control">
       <a class="btn btn-primary" onclick="inviteFriends()">Invite Friends</a>
-      <a class="btn btn-success" href="#">New Match</a>
+      <a class="btn btn-success" href="{{ url_for('draw') }}">New Match</a>
     </div>
     <div class="panel panel-success">
       <div class="panel-heading">
@@ -13,7 +13,33 @@
       </div>
       <div class="panel-body">
         <ul class="list-group" id="active">
-
+          {% for match in active_matches %}
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-xs-1 center">
+                <img src="{{ match.picture }}" />
+              </div>
+              <div class="col-xs-10">
+                <strong>{{ match.name }}</strong><br />
+                <span class="label label-info">{{ match.date }}</span>&nbsp;
+                <span class="label label-success">
+                  {% if match.action == 1 %}
+                    DRAW
+                  {% else %}
+                    HIT
+                  {% endif %}
+                </span>
+              </div>
+              <div class="col-xs-1 center">
+                {% if match.action == 1 %}
+                <a class="btn btn-info" href="{{ url_for('view', id=match.id) }}">Go</a>
+                {% else %}
+                <a class="btn btn-info" href="{{ url_for('hit') }}">Go</a>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -23,7 +49,29 @@
       </div>
       <div class="panel-body" id="history">
         <ul class="list-group">
-
+          {% for match in history_matches %}
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-xs-1 center">
+                <img src="{{ match.picture }}" />
+              </div>
+              <div class="col-xs-10">
+                <strong>{{ match.name }}</strong><br />
+                <span class="label label-info">{{ match.date }}</span>&nbsp;
+                <span class="label label-success">
+                  {% if match.action == 1 %}
+                    DRAW
+                  {% else %}
+                    HIT
+                  {% endif %}
+                </span>
+              </div>
+              <div class="col-xs-1 center">
+                <a class="btn btn-info" href="{{ url_for('view') }}">Go</a>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
         </ul>
       </div>
     </div>

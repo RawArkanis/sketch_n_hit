@@ -6,9 +6,9 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SECRET_KEY = 'SECRET'
-FACEBOOK_APP_ID = 'ID'
-FACEBOOK_APP_SECRET = 'SECRET'
+SECRET_KEY = 'not_so_secret'
+FACEBOOK_APP_ID = '595127900566216'
+FACEBOOK_APP_SECRET = '00a49392fe7240aa958ae747cf9060b5'
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, '../app.db')
 
@@ -30,15 +30,6 @@ facebook = oauth.remote_app('facebook',
 )
 
 from . import assets, requests, models
-
-
-@app.before_first_request
-def before_first_request():
-    try:
-        models.db.create_all()
-    except Exception, e:
-        app.logger.error(str(e))
-
 
 @facebook.tokengetter
 def get_facebook_oauth_token():

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  {% include "_nav.html" %}
+  <div class="well">
+    <div class="row">
+      <div class="col-xs-12">
+        <h1>Drawing: {{ drawing }}</h1>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12 center">
+        <img class="board" src="{{ data }}"/>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <div class="media">
+          <a class="pull-left" href="#">
+            <img class="media-object" src="{{ sender.picture }}">
+          </a>
+          <div class="media-body">
+            <h4 class="media-heading">{{ sender.name }}</h4>
+            <span class="label label-info">Sended</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <div class="media">
+          <a class="pull-left" href="#">
+            <img class="media-object" src="{{ receiver.picture }}">
+          </a>
+          <div class="media-body">
+            <h4 class="media-heading">{{ receiver.name }}</h4>
+            <span class="label label-info">Received</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <strong>Date: </strong>
+        <span class="label label-default">{{ date }}</span>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <strong>Status: </strong>
+        {% if status == 1 %}
+        <span class="label label-default">Waiting</span>
+        {% elif status == 2 %}
+        <span class="label label-success">Hit</span>
+        {% else %}
+        <span class="label label-danger">Missed</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="control">
+      <a class="btn btn-success" href="{{ url_for('match_list') }}">Back</a>
+    </div>
+  </div>
+</div><!-- /.container -->
+{% endblock %}
