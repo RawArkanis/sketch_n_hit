@@ -4,7 +4,9 @@ import random
 
 from . import app, facebook, models, db
 
+
 @app.route('/')
+@app.route('/home')
 def index():
     return render_template('index.html', title='Home')
 
@@ -208,19 +210,31 @@ def hit():
 
 @app.route('/create', methods=['POST'])
 def create():
-    sender = models.User.query.filter_by(fb_id=request.form['user_id']).first()
-    receiver = models.User.query.filter_by(fb_id=request.form['friend_id']).first()
+    try:
+        sender = models.User.query.filter_by(fb_id=request.form['user_id']).first()
+        receiver = models.User.query.filter_by(fb_id=request.form['friend_id']).first()
 
-    match = models.Match(
-        sender_id=sender.id,
-        receiver_id=receiver.id,
-        drawing_id=int(request.form['drawing_id']),
-        data=request.form['data'],
-        status=1,
-        last_activity=datetime.datetime.now()
-    )
+        match = models.Match(
+            sender_id=sender.id,
+            receiver_id=receiver.id,
+            drawing_id=int(request.form['drawing_id']),
+            data=request.form['data'],
+            status=1,
+            last_activity=datetime.datetime.now()
+        )
 
-    db.session.add(match)
-    db.session.commit()
+        db.session.add(match)
+        db.session.commit()
 
-    return redirect('/matchlist')
+        msg = facebook.get('/%s/notifications?access_token=%s&template=%s&href=%s' % (receiver.fb_id,
+                           session['oauth_token'], '@{%s} started a match with you, play now!' % receiver.fb_id,
+                           'home'))
+
+        return redirect('/matchlist')
+
+    except:  # I know, this is bad
+        return render_template('error.html',
+                               title='Error',
+                               strong='Oh no!',
+                               message='Something bad happened when loading this page.')
+
