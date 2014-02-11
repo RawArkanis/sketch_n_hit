@@ -34,7 +34,7 @@
                 {% if match.action == 1 %}
                 <a class="btn btn-danger" href="{{ url_for('view', id=match.id) }}">Go</a>
                 {% else %}
-                <a class="btn btn-danger" href="{{ url_for('hit') }}">Go</a>
+                <a class="btn btn-danger" href="{{ url_for('hit', id=match.id) }}">Go</a>
                 {% endif %}
               </div>
             </div>
@@ -67,7 +67,7 @@
                 </span>
               </div>
               <div class="col-xs-1 center">
-                <a class="btn btn-danger" href="{{ url_for('view') }}">Go</a>
+                <a class="btn btn-danger" href="{{ url_for('view', id=match.id) }}">Go</a>
               </div>
             </div>
           </li>

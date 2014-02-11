@@ -35,7 +35,7 @@ canvas {
 }
 
 .jumbotron h1 {
-  color: #ad1d28;
+  color: #158cba;
 }
 
 .control {
@@ -69,4 +69,14 @@ canvas {
 
 .dropdown-menu {
   width: 400px;
+}
+
+#answer {
+    margin: 0 auto;
+    width: 50px;
+}
+
+.label-big {
+    font-size: 16px;
+    font-weight: bold;
 }

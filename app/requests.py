@@ -38,13 +38,13 @@ def authorized():
 
     user = models.User.query.filter_by(fb_id=me['id']).first()
     if user is None:
-            user = models.User(fb_id=me['id'],
-                               accepted=True,
-                               creation=datetime.datetime.now(),
-                               last_activity=datetime.datetime.now())
+        user = models.User(fb_id=me['id'],
+                           accepted=True,
+                           creation=datetime.datetime.now(),
+                           last_activity=datetime.datetime.now())
 
-            db.session.add(user)
-            db.session.commit()
+        db.session.add(user)
+        db.session.commit()
 
     return redirect(url_for('match_list'))
 
@@ -109,7 +109,7 @@ def match_list():
                 friend = match.sender
                 action = 2
 
-            friend_data = (item for item in frd.data if item['id'] == friend.fb_id)
+            friend_data = [item for item in frd['data'] if item['id'] == friend.fb_id][0]
 
             history_matches.append(
                 {
@@ -216,10 +216,20 @@ def hit():
         return redirect('/')
 
     try:
+        fb = facebook.get_session(session['access_token'])
+
+        frd = fb.get('/me/friends?fields=id,name,picture').json()
+
+        match = models.Match.query.filter_by(id=request.args.get('id')).first()
+
+        sender = [item for item in frd['data'] if item['id'] == match.sender.fb_id][0]
+
         return render_template('hit.html',
                                title='Hit',
-                               sender={'name': 'lol', 'picture': 'lol'},
-                               data='lol')
+                               id=match.id,
+                               sender={'name': sender['name'], 'picture': sender['picture']['data']['url']},
+                               data=match.data,
+                               word=match.drawing.name)
 
     except:
         return render_template('error.html',
@@ -252,16 +262,16 @@ def create():
         db.session.commit()
 
         auth = fb.get('oauth/access_token?grant_type=client_credentials' +
-                            '&client_id=%s&client_secret=%s' % (FACEBOOK_APP_ID, FACEBOOK_APP_SECRET))
+                      '&client_id=%s&client_secret=%s' % (FACEBOOK_APP_ID, FACEBOOK_APP_SECRET))
 
         trash, token = auth.text.split('=')
 
         msg = fb.post('/%s/notifications' % receiver.fb_id,
-                            data={
-                                'access_token': token,
-                                'template': '@{%s} started a match with you, play now!' % sender.fb_id,
-                                'href': 'home'
-                            }).json()
+                      data={
+                          'access_token': token,
+                          'template': '@[%s] started a match with you, play now!' % sender.fb_id,
+                          'href': 'home'
+                      }).json()
 
         return redirect('/matchlist')
 
@@ -271,3 +281,48 @@ def create():
                                strong='Oh no!',
                                message='Something bad happened when loading this page.')
 
+
+@app.route('/save', methods=['GET'])
+def save():
+    if 'access_token' not in session:
+        return redirect('/')
+
+    try:
+        fb = facebook.get_session(session['access_token'])
+
+        match = models.Match.query.filter_by(id=request.args.get('id')).first()
+
+        message = ''
+
+        if int(request.args.get('result')) == 1:
+            message = 'hit'
+            match.status = 2
+        else:
+            message = 'missed'
+            match.status = 3
+
+        match.last_activity = datetime.datetime.now()
+
+        db.session.add(match)
+        db.session.commit()
+
+        auth = fb.get('oauth/access_token?grant_type=client_credentials' +
+                      '&client_id=%s&client_secret=%s' % (FACEBOOK_APP_ID, FACEBOOK_APP_SECRET))
+
+        trash, token = auth.text.split('=')
+
+        msg = fb.post('/%s/notifications' % match.sender.fb_id,
+                      data={
+                          'access_token': token,
+                          'template': ('@[%s] ' % match.receiver.fb_id) + message + ' your ' +
+                                      match.drawing.name + ' drawing!',
+                          'href': 'home'
+                      }).json()
+
+        return redirect('/matchlist')
+
+    except:  # I know, this is bad
+        return render_template('error.html',
+                               title='Error',
+                               strong='Oh no!',
+                               message='Something bad happened when loading this page.')

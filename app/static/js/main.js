@@ -1,5 +1,14 @@
 'use strict';
 
+var word = '';
+var letters = [];
+var letters_no_repeat = [];
+var hit = [];
+var wrong = '';
+
+var MAX_ERRORS = 5;
+var errors = 0;
+
 var error_tmpl = _.template(
     '<div class="alert alert-danger" id="danger">\n' +
     '  <strong><%= title %></strong> <%= message %>\n' +
@@ -18,8 +27,10 @@ $(document).ready(function() {
 
     //FB.getLoginStatus();
 
-    if ($('#board') !== undefined)
+    if ($('#board').length > 0)
         var defaultBoard = new DrawingBoard.Board('board',{ webStorage: false });
+    else if ($('#word').length > 0)
+        initHit();
   });
 });
 
@@ -64,4 +75,49 @@ function validadeCreateDraw() {
     $('#data').val(data);
 
     return true;
+}
+
+function initHit() {
+    word = $('#word').val().toUpperCase();;
+    letters = word.split('');
+
+    for (var i = 0; i < letters.length; i++) {
+        if (_.find(letters_no_repeat, function(chr) { return chr == letters[i] }) == undefined)
+            letters_no_repeat.push(letters[i])
+    }
+
+    $('#word').remove();
+
+    $(document).keypress(function(event){
+        var ltr = String.fromCharCode(event.which).toUpperCase();
+
+        var count = 0;
+
+        for (var i = 1; i <= letters.length; i++) {
+            if (letters[i-1] == ltr) {
+                $('#letter_' + i).html(ltr);
+
+                var ret = _.find(hit, function(chr) { return chr == ltr });
+                if (ret == undefined)
+                    hit.push(ltr);
+
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            errors++;
+            wrong += ltr;
+            $('#errors').html(wrong);
+        }
+
+        if (errors >= MAX_ERRORS) {
+            $(document).unbind('keypress');
+            $('#over_lose').modal({backdrop: 'static'})
+        }
+        if (hit.length == letters_no_repeat.length) {
+            $(document).unbind('keypress');
+            $('#over_win').modal({backdrop: 'static'})
+        }
+     })
 }

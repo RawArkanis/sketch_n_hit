@@ -6,9 +6,9 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SECRET_KEY = 'not_so_secret'
+SECRET_KEY = 'MY_SECRET'
 FACEBOOK_APP_ID = '595127900566216'
-FACEBOOK_APP_SECRET = '2399d8786b3a4b8074e37ad04702182c'
+FACEBOOK_APP_SECRET = 'APP_SECRET'
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, '../app.db')
 
