@@ -42,14 +42,14 @@
     <div class="row spacer">
       <div class="col-xs-12">
         <strong>Date: </strong>
-        <span class="label label-default">{{ date }}</span>
+        <span class="label label-primary">{{ date }}</span>
       </div>
     </div>
     <div class="row spacer">
       <div class="col-xs-12">
         <strong>Status: </strong>
         {% if status == 1 %}
-        <span class="label label-default">Waiting</span>
+        <span class="label label-primary">Waiting</span>
         {% elif status == 2 %}
         <span class="label label-success">Hit</span>
         {% else %}
@@ -58,7 +58,7 @@
       </div>
     </div>
     <div class="control">
-      <a class="btn btn-success" href="{{ url_for('match_list') }}">Back</a>
+      <a class="btn btn-default" href="{{ url_for('match_list') }}">Back</a>
     </div>
   </div>
 </div><!-- /.container -->

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  {% include "_nav.html" %}
+  <div class="well">
+    <div class="row">
+      <div class="col-xs-12">
+        <h1>Hitting</h1>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <div class="media">
+          <a class="pull-left" href="#">
+            <img class="media-object" src="{{ sender.picture }}">
+          </a>
+          <div class="media-body">
+            <h4 class="media-heading">{{ sender.name }}</h4>
+            <span class="label label-info">Sended</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12 center">
+        <img class="board" src="{{ data }}"/>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <p class="bg-warning">
+          <span class="label label-success"> </span>&nbsp;
+          <span class="label label-success"> </span>&nbsp;
+          <span class="label label-success"> </span>&nbsp;
+          <span class="label label-success"> </span>&nbsp;
+          <span class="label label-success"> </span>&nbsp;
+          teste
+        </p>
+      </div>
+    </div>
+    <div class="row spacer">
+      <div class="col-xs-12">
+        <div class="progress progress-striped active">
+          <div class="progress-bar-danger"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+            <span class="sr-only">45% Complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /.container -->
+{% endblock %}

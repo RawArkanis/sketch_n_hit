@@ -4,10 +4,10 @@
   {% include "_nav.html" %}
   <div class="well">
     <div class="control">
-      <a class="btn btn-primary" onclick="inviteFriends()">Invite Friends</a>
-      <a class="btn btn-success" href="{{ url_for('draw') }}">New Match</a>
+      <a class="btn btn-info" onclick="inviteFriends()">Invite Friends</a>
+      <a class="btn btn-primary" href="{{ url_for('draw') }}">New Match</a>
     </div>
-    <div class="panel panel-success">
+    <div class="panel panel-primary">
       <div class="panel-heading">
         <h3 class="panel-title center">Your Active Matches</h3>
       </div>
@@ -22,7 +22,7 @@
               <div class="col-xs-10">
                 <strong>{{ match.name }}</strong><br />
                 <span class="label label-info">{{ match.date }}</span>&nbsp;
-                <span class="label label-success">
+                <span class="label label-primary">
                   {% if match.action == 1 %}
                     DRAW
                   {% else %}
@@ -32,9 +32,9 @@
               </div>
               <div class="col-xs-1 center">
                 {% if match.action == 1 %}
-                <a class="btn btn-info" href="{{ url_for('view', id=match.id) }}">Go</a>
+                <a class="btn btn-danger" href="{{ url_for('view', id=match.id) }}">Go</a>
                 {% else %}
-                <a class="btn btn-info" href="{{ url_for('hit') }}">Go</a>
+                <a class="btn btn-danger" href="{{ url_for('hit') }}">Go</a>
                 {% endif %}
               </div>
             </div>
@@ -43,7 +43,7 @@
         </ul>
       </div>
     </div>
-    <div class="panel panel-primary">
+    <div class="panel panel-info">
       <div class="panel-heading">
         <h3 class="panel-title center">Your History of Matches</h3>
       </div>
@@ -58,7 +58,7 @@
               <div class="col-xs-10">
                 <strong>{{ match.name }}</strong><br />
                 <span class="label label-info">{{ match.date }}</span>&nbsp;
-                <span class="label label-success">
+                <span class="label label-primary">
                   {% if match.action == 1 %}
                     DRAW
                   {% else %}
@@ -67,7 +67,7 @@
                 </span>
               </div>
               <div class="col-xs-1 center">
-                <a class="btn btn-info" href="{{ url_for('view') }}">Go</a>
+                <a class="btn btn-danger" href="{{ url_for('view') }}">Go</a>
               </div>
             </div>
           </li>

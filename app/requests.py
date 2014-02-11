@@ -215,8 +215,17 @@ def hit():
     if 'access_token' not in session:
         return redirect('/')
 
-    #frd = facebook.get('/me/friends')
-    return 'done'
+    try:
+        return render_template('hit.html',
+                               title='Hit',
+                               sender={'name': 'lol', 'picture': 'lol'},
+                               data='lol')
+
+    except:
+        return render_template('error.html',
+                               title='Error',
+                               strong='Oh no!',
+                               message='Something bad happened when loading this page.')
 
 
 @app.route('/create', methods=['POST'])
