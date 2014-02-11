@@ -1,14 +1,14 @@
-from flask import Flask, session
+from flask import Flask
 from flask.ext.assets import Environment
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask_oauth import OAuth
+from rauth.service import OAuth2Service
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 SECRET_KEY = 'not_so_secret'
 FACEBOOK_APP_ID = '595127900566216'
-FACEBOOK_APP_SECRET = '00a49392fe7240aa958ae747cf9060b5'
+FACEBOOK_APP_SECRET = '2399d8786b3a4b8074e37ad04702182c'
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, '../app.db')
 
@@ -17,20 +17,14 @@ wa = Environment(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 db = SQLAlchemy(app)
 app.secret_key = SECRET_KEY
-oauth = OAuth()
 
-facebook = oauth.remote_app('facebook',
+facebook = OAuth2Service(
+    name='facebook',
     base_url='https://graph.facebook.com/',
-    request_token_url=None,
-    access_token_url='/oauth/access_token',
+    access_token_url='https://graph.facebook.com/oauth/access_token',
     authorize_url='https://www.facebook.com/dialog/oauth',
-    consumer_key=FACEBOOK_APP_ID,
-    consumer_secret=FACEBOOK_APP_SECRET,
-    request_token_params={'scope': 'email, publish_stream'}
+    client_id=FACEBOOK_APP_ID,
+    client_secret=FACEBOOK_APP_SECRET
 )
 
 from . import assets, requests, models
-
-@facebook.tokengetter
-def get_facebook_oauth_token():
-    return session.get('oauth_token')

@@ -1,39 +1,44 @@
-from flask import render_template, url_for, session, request, redirect
+from flask import render_template, flash, url_for, request, redirect, session
 import datetime
 import random
+import sys
 
-from . import app, facebook, models, db
+from . import app, facebook, models, db, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
 
 
-@app.route('/')
-@app.route('/home')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET', 'POST'])
 def index():
     return render_template('index.html', title='Home')
 
 
 @app.route('/login')
 def login():
-    return facebook.authorize(callback=url_for('facebook_authorized',
-                              next=request.args.get('next') or request.referrer or None,
-                              _external=True))
+    redirect_uri = url_for('authorized', _external=True)
+    params = {'redirect_uri': redirect_uri}
+    return redirect(facebook.get_authorize_url(**params))
 
 
 @app.route('/login/authorized')
-@facebook.authorized_handler
-def facebook_authorized(resp):
-    if resp is None:
-        return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
+def authorized():
+    # check to make sure the user authorized the request
+    if not 'code' in request.args:
+        flash('You did not authorize the request')
+        return redirect(url_for('index'))
 
-    session['oauth_token'] = (resp['access_token'], '')
+    # make a request for the access token credentials using code
+    redirect_uri = url_for('authorized', _external=True)
+    data = dict(code=request.args['code'], redirect_uri=redirect_uri)
 
-    me = facebook.get('/me')
+    fb = facebook.get_auth_session(data=data)
 
-    user = models.User.query.filter_by(fb_id=me.data['id']).first()
+    session['access_token'] = fb.access_token
+
+    me = fb.get('/me').json()
+
+    user = models.User.query.filter_by(fb_id=me['id']).first()
     if user is None:
-            user = models.User(fb_id=me.data['id'],
+            user = models.User(fb_id=me['id'],
                                accepted=True,
                                creation=datetime.datetime.now(),
                                last_activity=datetime.datetime.now())
@@ -41,19 +46,21 @@ def facebook_authorized(resp):
             db.session.add(user)
             db.session.commit()
 
-    return redirect('matchlist')
+    return redirect(url_for('match_list'))
 
 
 @app.route('/matchlist')
 def match_list():
-    if 'oauth_token' not in session:
+    if 'access_token' not in session:
         return redirect('/')
 
     try:
-        me = facebook.get('/me')
-        frd = facebook.get('/me/friends?fields=id,name,picture')
+        fb = facebook.get_session(session['access_token'])
 
-        user = models.User.query.filter_by(fb_id=me.data['id']).first()
+        me = fb.get('/me').json()
+        frd = fb.get('/me/friends?fields=id,name,picture').json()
+
+        user = models.User.query.filter_by(fb_id=me['id']).first()
 
         active_matches = []
         history_matches = []
@@ -68,20 +75,20 @@ def match_list():
         history.sort(key=lambda x: x.last_activity, reverse=True)
 
         if len(active) > 10:
-            active = [x for x in active[:5]]
+            active = [x for x in active[:10]]
 
         if len(history) > 10:
-            history = [x for x in history[:5]]
+            history = [x for x in history[:10]]
 
         for match in active:
-            if match.sender.fb_id == me.data['id']:
+            if match.sender.fb_id == me['id']:
                 friend = match.receiver
                 action = 1
             else:
                 friend = match.sender
                 action = 2
 
-            friend_data = [item for item in frd.data['data'] if item['id'] == friend.fb_id][0]
+            friend_data = [item for item in frd['data'] if item['id'] == friend.fb_id][0]
 
             active_matches.append(
                 {
@@ -95,14 +102,14 @@ def match_list():
             )
 
         for match in history:
-            if match.sender.fb_id == me.data['id']:
+            if match.sender.fb_id == me['id']:
                 friend = match.receiver
                 action = 1
             else:
                 friend = match.sender
                 action = 2
 
-            friend_data = (item for item in frd.data.data if item['id'] == friend.fb_id)
+            friend_data = (item for item in frd.data if item['id'] == friend.fb_id)
 
             history_matches.append(
                 {
@@ -129,27 +136,29 @@ def match_list():
 
 @app.route('/view')
 def view():
-    if 'oauth_token' not in session:
+    if 'access_token' not in session:
         return redirect('/')
 
     try:
-        me = facebook.get('/me?fields=id,name,picture')
-        frd = facebook.get('/me/friends?fields=id,name,picture')
+        fb = facebook.get_session(session['access_token'])
+
+        me = fb.get('/me?fields=id,name,picture').json()
+        frd = fb.get('/me/friends?fields=id,name,picture').json()
 
         match = models.Match.query.filter_by(id=request.args.get('id')).first()
 
-        if match.sender.fb_id != me.data['id'] and match.receiver.fb_id != me.data['id']:
+        if match.sender.fb_id != me['id'] and match.receiver.fb_id != me['id']:
             render_template('error.html',
                             title='Error',
                             strong='Hmmm!',
                             message='You do not have permissions to access this page.')
 
-        if match.sender.fb_id == me.data['id']:
-            sender = me.data
-            receiver = [item for item in frd.data['data'] if item['id'] == match.receiver.fb_id][0]
+        if match.sender.fb_id == me['id']:
+            sender = me
+            receiver = [item for item in frd['data'] if item['id'] == match.receiver.fb_id][0]
         else:
-            sender = [item for item in frd.data['data'] if item['id'] == match.sender.fb_id][0]
-            receiver = me.data
+            sender = [item for item in frd['data'] if item['id'] == match.sender.fb_id][0]
+            receiver = me
 
         return render_template('view.html',
                                title='View',
@@ -169,15 +178,17 @@ def view():
 
 @app.route('/draw')
 def draw():
-    if 'oauth_token' not in session:
+    if 'access_token' not in session:
         return redirect('/')
 
     try:
-        me = facebook.get('/me')
-        frd = facebook.get('/me/friends?fields=id,name,picture,installed')
+        fb = facebook.get_session(session['access_token'])
+
+        me = fb.get('/me').json()
+        frd = fb.get('/me/friends?fields=id,name,picture,installed').json()
 
         friends = []
-        for friend in frd.data['data']:
+        for friend in frd['data']:
             if 'installed' in friend:
                 friends.append(friend)
 
@@ -188,7 +199,7 @@ def draw():
 
         return render_template('draw.html',
                                title='Draw',
-                               user_id=me.data['id'],
+                               user_id=me['id'],
                                friends=friends,
                                drawings=_3_drawings)
 
@@ -201,16 +212,21 @@ def draw():
 
 @app.route('/hit')
 def hit():
-    if 'oauth_token' not in session:
+    if 'access_token' not in session:
         return redirect('/')
 
-    frd = facebook.get('/me/friends')
+    #frd = facebook.get('/me/friends')
     return 'done'
 
 
 @app.route('/create', methods=['POST'])
 def create():
+    if 'access_token' not in session:
+        return redirect('/')
+
     try:
+        fb = facebook.get_session(session['access_token'])
+
         sender = models.User.query.filter_by(fb_id=request.form['user_id']).first()
         receiver = models.User.query.filter_by(fb_id=request.form['friend_id']).first()
 
@@ -226,9 +242,17 @@ def create():
         db.session.add(match)
         db.session.commit()
 
-        msg = facebook.get('/%s/notifications?access_token=%s&template=%s&href=%s' % (receiver.fb_id,
-                           session['oauth_token'], '@{%s} started a match with you, play now!' % receiver.fb_id,
-                           'home'))
+        auth = fb.get('oauth/access_token?grant_type=client_credentials' +
+                            '&client_id=%s&client_secret=%s' % (FACEBOOK_APP_ID, FACEBOOK_APP_SECRET))
+
+        trash, token = auth.text.split('=')
+
+        msg = fb.post('/%s/notifications' % receiver.fb_id,
+                            data={
+                                'access_token': token,
+                                'template': '@{%s} started a match with you, play now!' % sender.fb_id,
+                                'href': 'home'
+                            }).json()
 
         return redirect('/matchlist')
 
