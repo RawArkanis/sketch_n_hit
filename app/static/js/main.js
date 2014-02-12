@@ -111,12 +111,14 @@ function initHit() {
             $('#errors').html(wrong);
         }
 
-        if (errors >= MAX_ERRORS) {
+        if (errors >= letters_no_repeat.length + MAX_ERRORS) {
             $(document).unbind('keypress');
+            $('#place').html(word);
             $('#over_lose').modal({backdrop: 'static'})
         }
         if (hit.length == letters_no_repeat.length) {
             $(document).unbind('keypress');
+            $('#place').html(word);
             $('#over_win').modal({backdrop: 'static'})
         }
      })
