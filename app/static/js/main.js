@@ -113,12 +113,12 @@ function initHit() {
 
         if (errors >= letters_no_repeat.length + MAX_ERRORS) {
             $(document).unbind('keypress');
-            $('#place').html(word);
+            $('#place_m').html(word);
             $('#over_lose').modal({backdrop: 'static'})
         }
         if (hit.length == letters_no_repeat.length) {
             $(document).unbind('keypress');
-            $('#place').html(word);
+            $('#place_h').html(word);
             $('#over_win').modal({backdrop: 'static'})
         }
      })
