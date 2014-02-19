@@ -250,12 +250,12 @@ def create():
         receiver = models.User.query.filter_by(fb_id=request.form['friend_id']).first()
 
         if receiver is None:
-            user = models.User(fb_id=request.form['friend_id'],
+            receiver = models.User(fb_id=request.form['friend_id'],
                                accepted=True,
                                creation=datetime.datetime.now(),
                                last_activity=datetime.datetime.now())
 
-            db.session.add(user)
+            db.session.add(receiver)
             db.session.commit()
 
         match = models.Match(
